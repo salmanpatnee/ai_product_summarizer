@@ -1,6 +1,7 @@
 import { type Review } from "../generated/prisma"
 import { llmClient } from "../llm/client"
 import { reviewRepository } from "../repositories/review.repository"
+import template from "../prompts/review-summarizer.txt"
 
 
 
@@ -14,11 +15,8 @@ export const reviewService = {
 
         const joinedReviews = reviews.map(review => review.body).join('\n\n')
 
-        const prompt = `
-       Summarize the following customer reviews into a short paragraph. Highlight the main positive aspects customers liked, and the main negative aspects they mentioned. Keep the tone neutral and professional.
+        const prompt = template.replace('{{reviews}}', joinedReviews)
 
-        Reviews: ${joinedReviews}
-        `
         const response = await llmClient.generateText({
             prompt,
             maxTokens: 500,

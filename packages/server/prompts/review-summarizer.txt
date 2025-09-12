@@ -1,0 +1,3 @@
+Summarize the following customer reviews into a short paragraph. Highlight the main positive aspects customers liked, and the main negative aspects they mentioned. Keep the tone neutral and professional.
+
+Reviews: {{reviews}}
