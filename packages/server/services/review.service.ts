@@ -2,6 +2,7 @@ import { type Review } from "../generated/prisma"
 import { llmClient } from "../llm/client"
 import { reviewRepository } from "../repositories/review.repository"
 import template from "../prompts/review-summarizer.txt"
+import { text } from "express"
 
 
 
@@ -17,11 +18,13 @@ export const reviewService = {
 
         const prompt = template.replace('{{reviews}}', joinedReviews)
 
-        const response = await llmClient.generateText({
+        const { text: summary } = await llmClient.generateText({
             prompt,
             maxTokens: 500,
         })
 
-        return response.text
+        await reviewRepository.storeReviewSummary(productId, summary)
+
+        return summary
     }
 }
