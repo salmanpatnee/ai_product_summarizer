@@ -1,8 +1,7 @@
-import { type Review } from "../generated/prisma"
+import { type Review, type Summary } from "../generated/prisma"
 import { llmClient } from "../llm/client"
 import { reviewRepository } from "../repositories/review.repository"
 import template from "../prompts/review-summarizer.txt"
-import { text } from "express"
 
 
 
@@ -12,6 +11,13 @@ export const reviewService = {
     },
 
     async summarizeReviews(productId: number): Promise<String> {
+
+        const existingSummary = await reviewRepository.getReviewSummary(productId)
+
+        if (existingSummary && existingSummary.expiresAt > new Date()) {
+            return existingSummary.body
+        }
+
         const reviews = await reviewRepository.fetchProductReviews(productId, 10)
 
         const joinedReviews = reviews.map(review => review.body).join('\n\n')
@@ -26,5 +32,7 @@ export const reviewService = {
         await reviewRepository.storeReviewSummary(productId, summary)
 
         return summary
-    }
+    },
+
+
 }

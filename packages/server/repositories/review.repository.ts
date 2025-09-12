@@ -28,5 +28,9 @@ export const reviewRepository = {
             create: attributes,
             update: attributes
         })
+    },
+
+    getReviewSummary(productId: number) {
+        return prisma.summary.findUnique({ where: { productId } })
     }
 }
