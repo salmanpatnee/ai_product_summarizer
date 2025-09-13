@@ -6,16 +6,13 @@ import template from "../prompts/review-summarizer.txt"
 
 
 export const reviewService = {
-    async fetchProductReviews(productId: number): Promise<Review[]> {
-        return await reviewRepository.fetchProductReviews(productId)
-    },
 
     async summarizeReviews(productId: number): Promise<String> {
 
         const existingSummary = await reviewRepository.getReviewSummary(productId)
 
-        if (existingSummary && existingSummary.expiresAt > new Date()) {
-            return existingSummary.body
+        if (existingSummary) {
+            return existingSummary
         }
 
         const reviews = await reviewRepository.fetchProductReviews(productId, 10)
