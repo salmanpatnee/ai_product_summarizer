@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import Skeleton from 'react-loading-skeleton';
-import StarRating from './StarRating';
+import { useState } from 'react';
 import { RiSparkling2Fill } from 'react-icons/ri';
 import { Button } from '../ui/button';
-import { useState } from 'react';
+import ReviewSkeleton from './ReviewSkeleton';
+import StarRating from './StarRating';
 
 interface Props {
    productId: number;
@@ -23,11 +23,10 @@ type GetReviewsResponse = {
    reviews: Review[];
 };
 
-type SummaryResponse = {
-   summary: string;
-};
-
 const ReviewList = ({ productId }: Props) => {
+   const [summary, setSummary] = useState('');
+   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+
    const {
       data: reviewData,
       isLoading,
@@ -36,8 +35,6 @@ const ReviewList = ({ productId }: Props) => {
       queryKey: ['reviews', productId],
       queryFn: () => getReviews(),
    });
-
-   const [summary, setSummary] = useState('');
 
    const getReviews = async () => {
       const { data } = await axios.get<GetReviewsResponse>(
@@ -48,11 +45,14 @@ const ReviewList = ({ productId }: Props) => {
    };
 
    const handleSummary = async () => {
-      const { data } = await axios.post<SummaryResponse>(
+      setIsSummaryLoading(true);
+
+      const { data: summary } = await axios.post(
          `${import.meta.env.VITE_BACKEND_URL}/api/products/${productId}/reviews/summarize`
       );
 
-      setSummary(data.summary);
+      setIsSummaryLoading(false);
+      setSummary(summary);
    };
 
    if (isLoading) {
@@ -60,9 +60,7 @@ const ReviewList = ({ productId }: Props) => {
          <div className="flex flex-col gap-5">
             {[1, 2, 3].map((i) => (
                <div key={i}>
-                  <Skeleton width={150} />
-                  <Skeleton width={100} />
-                  <Skeleton count={2} />
+                  <ReviewSkeleton />
                </div>
             ))}
          </div>
@@ -85,9 +83,20 @@ const ReviewList = ({ productId }: Props) => {
             {currentSummary ? (
                <p>{currentSummary}</p>
             ) : (
-               <Button onClick={handleSummary}>
-                  <RiSparkling2Fill /> Summarize
-               </Button>
+               <div>
+                  <Button
+                     onClick={handleSummary}
+                     disabled={isSummaryLoading}
+                     className="cursor-pointer"
+                  >
+                     <RiSparkling2Fill /> Summarize
+                  </Button>
+                  {isSummaryLoading && (
+                     <div className="py-3">
+                        <ReviewSkeleton />
+                     </div>
+                  )}
+               </div>
             )}
          </div>
          <div className="flex flex-col gap-5">
