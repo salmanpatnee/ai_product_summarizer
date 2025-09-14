@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import Skeleton from 'react-loading-skeleton';
 import StarRating from './StarRating';
+import { RiSparkling2Fill } from 'react-icons/ri';
+import { Button } from '../ui/button';
 
 interface Props {
    productId: number;
@@ -56,14 +58,29 @@ const ReviewList = ({ productId }: Props) => {
       return <p className="text-red-500">Something went wrong.</p>;
    }
 
+   if (!reviewData?.reviews.length) {
+      return null;
+   }
+
    return (
-      <div className="flex flex-col gap-5">
-         {reviewData?.reviews.map((review) => (
-            <div key={review.id}>
-               <StarRating value={review.rating} />
-               <p className="py-2">{review.body}</p>
-            </div>
-         ))}
+      <div>
+         <div className="mb-5">
+            {reviewData?.summary ? (
+               <p>{reviewData.summary}</p>
+            ) : (
+               <Button>
+                  <RiSparkling2Fill /> Summarize
+               </Button>
+            )}
+         </div>
+         <div className="flex flex-col gap-5">
+            {reviewData?.reviews.map((review) => (
+               <div key={review.id}>
+                  <StarRating value={review.rating} />
+                  <p className="py-2">{review.body}</p>
+               </div>
+            ))}
+         </div>
       </div>
    );
 };
