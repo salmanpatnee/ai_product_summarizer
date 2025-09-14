@@ -4,6 +4,7 @@ import Skeleton from 'react-loading-skeleton';
 import StarRating from './StarRating';
 import { RiSparkling2Fill } from 'react-icons/ri';
 import { Button } from '../ui/button';
+import { useState } from 'react';
 
 interface Props {
    productId: number;
@@ -22,6 +23,10 @@ type GetReviewsResponse = {
    reviews: Review[];
 };
 
+type SummaryResponse = {
+   summary: string;
+};
+
 const ReviewList = ({ productId }: Props) => {
    const {
       data: reviewData,
@@ -32,12 +37,22 @@ const ReviewList = ({ productId }: Props) => {
       queryFn: () => getReviews(),
    });
 
+   const [summary, setSummary] = useState('');
+
    const getReviews = async () => {
       const { data } = await axios.get<GetReviewsResponse>(
          `${import.meta.env.VITE_BACKEND_URL}/api/products/${productId}/reviews`
       );
 
       return data;
+   };
+
+   const handleSummary = async () => {
+      const { data } = await axios.post<SummaryResponse>(
+         `${import.meta.env.VITE_BACKEND_URL}/api/products/${productId}/reviews/summarize`
+      );
+
+      setSummary(data.summary);
    };
 
    if (isLoading) {
@@ -62,13 +77,15 @@ const ReviewList = ({ productId }: Props) => {
       return null;
    }
 
+   const currentSummary = reviewData.summary || summary;
+
    return (
       <div>
          <div className="mb-5">
-            {reviewData?.summary ? (
-               <p>{reviewData.summary}</p>
+            {currentSummary ? (
+               <p>{currentSummary}</p>
             ) : (
-               <Button>
+               <Button onClick={handleSummary}>
                   <RiSparkling2Fill /> Summarize
                </Button>
             )}
