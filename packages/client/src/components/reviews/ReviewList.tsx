@@ -1,6 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import Skeleton from 'react-loading-skeleton';
-import { useEffect, useState } from 'react';
 import StarRating from './StarRating';
 
 interface Props {
@@ -21,29 +21,22 @@ type GetReviewsResponse = {
 };
 
 const ReviewList = ({ productId }: Props) => {
-   const [reviewData, setReviewData] = useState<GetReviewsResponse>();
-   const [isLoading, setIsLoading] = useState(false);
-   const [error, setError] = useState('');
+   const {
+      data: reviewData,
+      isLoading,
+      error,
+   } = useQuery<GetReviewsResponse>({
+      queryKey: ['reviews', productId],
+      queryFn: () => getReviews(),
+   });
 
    const getReviews = async () => {
-      try {
-         setIsLoading(true);
-         const { data } = await axios.get<GetReviewsResponse>(
-            `${import.meta.env.VITE_BACKEND_URL}/api/products/${productId}/reviews`
-         );
+      const { data } = await axios.get<GetReviewsResponse>(
+         `${import.meta.env.VITE_BACKEND_URL}/api/products/${productId}/reviews`
+      );
 
-         setReviewData(data);
-      } catch (error) {
-         console.log(error);
-         setError('Something went wrong.');
-      } finally {
-         setIsLoading(false);
-      }
+      return data;
    };
-
-   useEffect(() => {
-      getReviews();
-   }, []);
 
    if (isLoading) {
       return (
@@ -60,7 +53,7 @@ const ReviewList = ({ productId }: Props) => {
    }
 
    if (error) {
-      return <p className="text-red-500">{error}</p>;
+      return <p className="text-red-500">Something went wrong.</p>;
    }
 
    return (
