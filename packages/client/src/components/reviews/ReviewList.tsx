@@ -26,6 +26,7 @@ type GetReviewsResponse = {
 const ReviewList = ({ productId }: Props) => {
    const [summary, setSummary] = useState('');
    const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+   const [summaryError, setSummaryError] = useState('');
 
    const {
       data: reviewData,
@@ -45,14 +46,20 @@ const ReviewList = ({ productId }: Props) => {
    };
 
    const handleSummary = async () => {
-      setIsSummaryLoading(true);
+      try {
+         setIsSummaryLoading(true);
+         setSummaryError('');
 
-      const { data: summary } = await axios.post(
-         `${import.meta.env.VITE_BACKEND_URL}/api/products/${productId}/reviews/summarize`
-      );
-
-      setIsSummaryLoading(false);
-      setSummary(summary);
+         const { data: summary } = await axios.post(
+            `${import.meta.env.VITE_BACKEND_URL}/api/products/${productId}/reviews/summarize`
+         );
+         setSummary(summary);
+      } catch (error) {
+         console.log(error);
+         setSummaryError('Something went wrong.');
+      } finally {
+         setIsSummaryLoading(false);
+      }
    };
 
    if (isLoading) {
@@ -95,6 +102,9 @@ const ReviewList = ({ productId }: Props) => {
                      <div className="py-3">
                         <ReviewSkeleton />
                      </div>
+                  )}
+                  {summaryError && (
+                     <p className="text-red-400">{summaryError}</p>
                   )}
                </div>
             )}
