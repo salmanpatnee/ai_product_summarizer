@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import StarRating from './StarRating';
 
 interface Props {
    productId: number;
@@ -37,7 +38,7 @@ const ReviewList = ({ productId }: Props) => {
       <div className="flex flex-col gap-5">
          {reviewData?.reviews.map((review) => (
             <div key={review.id}>
-               <div>Rating: {review.rating}/5</div>
+               <StarRating value={review.rating} />
                <p className="py-2">{review.body}</p>
             </div>
          ))}
