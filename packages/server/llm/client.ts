@@ -1,8 +1,11 @@
 import OpenAI from "openai";
+import { InferenceClient } from "@huggingface/inference";
 
-const client = new OpenAI({
+const openAIClient = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 })
+
+const inferenceClient = new InferenceClient(process.env.HF_TOKEN);
 
 interface GenerateTextParams {
     model?: string
@@ -19,7 +22,7 @@ interface GeneratedTextResponse {
 export const llmClient = {
 
     async generateText({ model = 'gpt-4.1', prompt, temperature = 0.2, maxTokens = 300 }: GenerateTextParams): Promise<GeneratedTextResponse> {
-        const response = await client.responses.create({
+        const response = await openAIClient.responses.create({
             model,
             input: prompt,
             temperature,
@@ -30,6 +33,16 @@ export const llmClient = {
             id: response.id,
             text: response.output_text
         }
+    },
+
+    async generateSummary(text: string) {
+        const output = await inferenceClient.summarization({
+            model: "facebook/bart-large-cnn",
+            inputs: text,
+            provider: "hf-inference",
+        });
+
+        return output.summary_text
     },
 
 }
